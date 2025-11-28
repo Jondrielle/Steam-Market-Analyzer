@@ -40,13 +40,14 @@ Analyzer/
 
 ## Features 
 - Dynamic Game Lookup
+  - Input a game name to fetch its AppID from Steam
 - Price Tracking
+  - Get current price, discount, and original price
 - Review Scraping
-- Sentiment Analysis
-- Pandas DataFrames for Clean Analysis
-- Price Trend Graphs
-- Sentiment Visualizations
-- Export Data
+  - Collect a few user reviews (text, date, helpful votes)
+- Data Storage
+  - Save all scraped data to a CSV for analysis 
+
 
 ## Technologies Used
 - Backend: Python, Requests, BeautifulSoup, Pandas, NumPy, CSV
