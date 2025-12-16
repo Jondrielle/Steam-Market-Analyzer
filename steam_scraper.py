@@ -12,33 +12,54 @@ def get_steam_info(game_name):
     search_url = f"https://store.steampowered.com/search/?term={game_name.replace(' ', '+')}"
     response = requests.get(search_url)
     soup = BeautifulSoup(response.text, "html.parser")
-    
+
     wrapper = soup.find("div", id="search_resultsRows")
-    result = wrapper.find("a", class_="search_result_row")
-    
-    title = result.find("span", class_="title").text.strip()
-    appid = result.get("data-ds-appid") or "UNKNOWN"
+    if not wrapper:
+        return []
 
-    price_block = result.find("div", class_="search_price_discount_combined")
-    final_price_div = price_block.find("div", class_="discount_final_price")
-    final_price = final_price_div.text.strip() if final_price_div else "No price"
+    results = []
 
-    discount_div = price_block.find("div", class_="discount_pct")
-    discount_pct = discount_div.text.strip() if discount_div else "0%"
+    rows = wrapper.find_all("a", class_="search_result_row")
 
-    original_price_div = price_block.find("div", class_="discount_original_price")
-    if discount_pct == "0%" or not original_price_div:
-        original_price = final_price
-    else:
-        original_price = original_price_div.text.strip()
+    for row in rows:
+        title_span = row.find("span", class_="title")
+        if not title_span:
+            continue
 
-    return {
-        "Title": title,
-        "AppID": appid,
-        "Original Price": original_price,
-        "Discount": discount_pct,
-        "Final Price": final_price
-    }
+        title = title_span.text.strip()
+        appid = row.get("data-ds-appid") or "UNKNOWN"
+
+        price_block = row.find("div", class_="search_price_discount_combined")
+
+        final_price = "No price"
+        discount_pct = "0%"
+        original_price = "No price"
+
+        if price_block:
+            final_price_div = price_block.find("div", class_="discount_final_price")
+            if final_price_div:
+                final_price = final_price_div.text.strip()
+
+            discount_div = price_block.find("div", class_="discount_pct")
+            if discount_div:
+                discount_pct = discount_div.text.strip()
+
+            original_price_div = price_block.find("div", class_="discount_original_price")
+            if discount_pct == "0%" or not original_price_div:
+                original_price = final_price
+            else:
+                original_price = original_price_div.text.strip()
+
+        results.append({
+            "Title": title,
+            "AppID": appid,
+            "Original Price": original_price,
+            "Discount": discount_pct,
+            "Final Price": final_price
+        })
+
+    return results
+
 
 def addGameToList(game_info):
     existing = set()
@@ -59,7 +80,7 @@ def addGameToList(game_info):
 
         if game_info["AppID"] not in existing:
             writer.writerow({
-                "Title": game_info["Title"],
+                "Title": game_info["Title"].upper(),
                 "AppID": game_info["AppID"]
             })
             print(f"Added: {game_info['Title']}")
@@ -72,10 +93,10 @@ def addGamePriceHistory(game_info):
         if f.tell() == 0:
             writer.writeheader()
 
-        writer.writerow({
-            "Date": datetime.now().strftime("%Y-%m-%d"),
-            **game_info
-        })
+        row = {**game_info, "Title": game_info["Title"].upper()}
+        row["Date"] = datetime.now().strftime("%Y-%m-%d")
+
+        writer.writerow(row)
 
 def deleteGameRowFromGameListFile():
     return
@@ -90,10 +111,29 @@ if __name__ == "__main__":
         if game_name.lower() == "done":
             break
 
-        info = get_steam_info(game_name)
-        print(f"Found: {info['Title']}")
+        results = get_steam_info(game_name)
 
-        addGamePriceHistory(info)
-        addGameToList(info)
-        
+        if not results:
+            print("No games found.\n")
+            continue
+
+        # Show top 10 results
+        for i, game in enumerate(results[:10], 1):
+            print(f"{i}) {game['Title']}")
+
+        choice = input("Select a game number to add (or press Enter to skip): ")
+        if not choice:
+            print("Skipped.\n")
+            continue
+
+        try:
+            selected = results[int(choice) - 1]
+        except (ValueError, IndexError):
+            print("Invalid choice, skipped.\n")
+            continue
+
+        # Save selected game
+        addGamePriceHistory(selected)
+        addGameToList(selected)
+
         print("Saved to games list and daily price log.\n")
