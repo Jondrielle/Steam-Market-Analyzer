@@ -1,0 +1,3 @@
+Journal Entry:
+- Next: Cors setup for frontend and backend
+- Notes: 
