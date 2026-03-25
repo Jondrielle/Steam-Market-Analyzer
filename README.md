@@ -1,5 +1,5 @@
 # Steam-Market-Analyzer
-Scrapes Steam game prices and user reviews, performs sentiment analysis, and visualizes trends with Python, Pandas, and Matplotlib.
+Scrapes Steam game prices and user reviews, performs sentiment analysis, and visualizes trends with Python and Pandas.
 
 ## Project Structure 
 <details>
@@ -39,20 +39,21 @@ Analyzer/
 </details> 
 
 ## Features 
-- Dynamic Game Lookup
-  - Input a game name to fetch its AppID from Steam
-- Price Tracking
-  - Get current price, discount, and original price
-- Review Scraping
-  - Collect a few user reviews (text, date, helpful votes)
-- Data Storage
-  - Save all scraped data to a CSV for analysis 
+- Search games using a custom backend API
+- Add games to personal list
+- Remove games from the list
+- View price history trends for selected games
+- Toggle price history by period(daily,monthly,yearly)
+- View review summary(total,positive,negative reviews)
+- Toast notifications for user actions(e.g. game added)
+- Click outside to close search results dropdown
 
 
 ## Technologies Used
-- Backend: Python, Requests, BeautifulSoup, Pandas, NumPy, CSV
-- Frontend: Matplotlib
+- Backend: Python, Requests, BeautifulSoup, Pandas, NumPy, CSV, FastAPI
+- Frontend: Vue,JavaScript, HTML/CSS, Tailwind CSS
 - Version Control: Git, GitHub
+- Data & APIs: Steam Store API, Custom REST API(FastAPI)
 
 ## Getting Started
 #### Prerequisites: 
