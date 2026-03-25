@@ -304,12 +304,15 @@ onBeforeUnmount(()=> {
           @closeChart="handleCloseChart"
           @selectPeriod="handleSetPeriod"
         />
+
+        <div class="border-b mb-4"></div>
+
         <div v-if="reviewSummary">
-          <h3>Reviews</h3>
-          <p>{{reviewSummary.review_score_desc}}</p>
-          <p>{{reviewSummary.total_positive.toLocaleString()}} Positive Reviews</p>
-          <p>{{reviewSummary.total_negative.toLocaleString()}} Negative Reviews</p>
-          <p>{{reviewSummary.total_reviews.toLocaleString()}} Reviews</p>
+          <h5 class="text-lg font-bold mb-1">{{reviewSummary.review_score_desc}}</h5>
+          <p class="font-semibold text-base mb-2"> {{((reviewSummary.total_positive/reviewSummary.total_reviews)*100).toFixed(0)}}% Positive</p>
+          <div class="h-2 rounded-full bg-gray-200"></div>
+          <p class="text-green-600">{{reviewSummary.total_positive.toLocaleString()}} Positive Reviews</p>
+          <p class="text-red-600">{{reviewSummary.total_negative.toLocaleString()}} Negative Reviews</p>
         </div>
       </section>
 
