@@ -55,15 +55,15 @@ async def get_list():
     return load_list()
 
 @router.get("/reviews/{app_id}")
-async def get_reviews(app_id: int):
+def get_reviews(app_id: int):
     import requests
 
-    url = f'https://store.steampowered.com/appreviews/{app_id}'
+    url = f"https://store.steampowered.com/appreviews/{app_id}"
 
     params = {
         "json": 1,
-        "language":"all",
-        "purchase_type":"all"
+        "language": "all",
+        "purchase_type": "all"
     }
 
     response = requests.get(url, params=params)

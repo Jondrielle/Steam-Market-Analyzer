@@ -28,9 +28,10 @@ const selectedGameTitle = computed(()=>{
 async function getReviews(appId){
   console.log("Game id is:", appId)
   try{
-    const response = await axios.get('http://localhost:8000/reviews/${appId}')
+    const response = await axios.get(`http://localhost:8000/reviews/${appId}`)
 
     reviewSummary.value = response.data.query_summary
+    console.log("Review:", reviewSummary.value)
 
   }catch(error){
     console.error("Failed to fetch reviews",error)
@@ -305,8 +306,9 @@ onBeforeUnmount(()=> {
         />
         <div v-if="reviewSummary">
           <h3>Reviews</h3>
-          <p>{{reviewSummary.positive_reviews.toLocaleString()}} Positive Reviews</p>
-          <p>{{reviewSummary.negative_reviews.toLocaleString()}} Negative Reviews</p>
+          <p>{{reviewSummary.review_score_desc}}</p>
+          <p>{{reviewSummary.total_positive.toLocaleString()}} Positive Reviews</p>
+          <p>{{reviewSummary.total_negative.toLocaleString()}} Negative Reviews</p>
           <p>{{reviewSummary.total_reviews.toLocaleString()}} Reviews</p>
         </div>
       </section>
