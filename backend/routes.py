@@ -54,6 +54,21 @@ async def add_game(request: TitleRequest):
 async def get_list():
     return load_list()
 
+@router.get("/reviews/{app_id}")
+async def get_reviews(app_id: int):
+    import requests
+
+    url = f'https://store.steampowered.com/appreviews/{app_id}'
+
+    params = {
+        "json": 1,
+        "language":"all",
+        "purchase_type":"all"
+    }
+
+    response = requests.get(url, params=params)
+    return response.json()
+
 # Delete game from list tracker 
 @router.delete("/delete/{game_id}")
 async def delete_game(game_id: str):

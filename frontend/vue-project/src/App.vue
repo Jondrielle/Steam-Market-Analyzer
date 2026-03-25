@@ -17,12 +17,26 @@ const selectedGameId = ref(null)
 const selectedPeriod = ref("daily")
 const resultsBox = ref(null)
 const notificationMessage = ref(null)
+const reviewSummary = ref(null)
 
 
 const selectedGameTitle = computed(()=>{
   const game = gameList.value.find(g => g.app_id === selectedGameId.value)
   return game ? game.title : ""
 })
+
+async function getReviews(appId){
+  console.log("Game id is:", appId)
+  try{
+    const response = await axios.get('http://localhost:8000/reviews/${appId}')
+
+    reviewSummary.value = response.data.query_summary
+
+  }catch(error){
+    console.error("Failed to fetch reviews",error)
+    console.log(error.response)
+  }
+}
 
 // REQUEST RESULTS
 async function getResults() {
@@ -128,6 +142,8 @@ async function showPriceHistory(gameId){
   } catch (err) {
     console.error("Failed to fetch price history", err);
   }
+
+  await getReviews(gameId)
 }
 
 // TOGGLE SHOW GAME LIST 
@@ -287,6 +303,12 @@ onBeforeUnmount(()=> {
           @closeChart="handleCloseChart"
           @selectPeriod="handleSetPeriod"
         />
+        <div v-if="reviewSummary">
+          <h3>Reviews</h3>
+          <p>{{reviewSummary.positive_reviews.toLocaleString()}} Positive Reviews</p>
+          <p>{{reviewSummary.negative_reviews.toLocaleString()}} Negative Reviews</p>
+          <p>{{reviewSummary.total_reviews.toLocaleString()}} Reviews</p>
+        </div>
       </section>
 
       <!-- EMPTY STATE -->
