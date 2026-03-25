@@ -310,8 +310,14 @@ onBeforeUnmount(()=> {
         <div v-if="reviewSummary">
           <h5 class="text-lg font-bold mb-1">{{reviewSummary.review_score_desc}}</h5>
           <p class="font-semibold text-base mb-2"> {{((reviewSummary.total_positive/reviewSummary.total_reviews)*100).toFixed(0)}}% Positive</p>
-          <div class="h-2 rounded-full bg-gray-200"></div>
-          <p class="text-green-600">{{reviewSummary.total_positive.toLocaleString()}} Positive Reviews</p>
+          <div class="h-2 rounded-full bg-gray-200 w-full mt-1">
+            <div 
+            class="h-2 rounded-full bg-green-500"
+            :style="{ width:((reviewSummary.total_positive /reviewSummary.total_reviews) * 100) + '%' }"
+            >
+            </div>
+          </div>
+          <p class="text-green-600 mt-2">{{reviewSummary.total_positive.toLocaleString()}} Positive Reviews</p>
           <p class="text-red-600">{{reviewSummary.total_negative.toLocaleString()}} Negative Reviews</p>
         </div>
       </section>
