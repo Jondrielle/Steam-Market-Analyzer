@@ -224,7 +224,7 @@ onBeforeUnmount(()=> {
               class="flex items-center gap-2 px-4 bg-sky-500 text-white rounded-lg hover:bg-sky-600 transition" 
               @click="getResults">
                 <MagnifyingGlassIcon 
-                  class="size-5 "/>
+                  class="size-5"/>
                   Search
             </button>
           </div>
@@ -238,7 +238,7 @@ onBeforeUnmount(()=> {
             <h3 class="font-semibold mb-2">Results</h3>
             <ul class="grid grid-cols-2 gap-2">
               <li 
-                class="p-2 rounded cursor-pointer hover:bg-sky-100 transition"  
+                class="p-2 rounded cursor-pointer hover:bg-sky-100 transition-all duration-150 hover:scale-120 active:scale-90"  
                 v-for="item in topResults" 
                 :key="item.app_id"
                 @click="addResult(item)"
