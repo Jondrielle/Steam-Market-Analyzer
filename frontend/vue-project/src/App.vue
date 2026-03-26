@@ -216,6 +216,7 @@ onBeforeUnmount(()=> {
             <input 
               v-model="searchName" 
               placeholder="Enter game name"
+              @keyup.enter="getResults"
               class="border rounded-xl px-3 py-2 flex-1"
             />
 
