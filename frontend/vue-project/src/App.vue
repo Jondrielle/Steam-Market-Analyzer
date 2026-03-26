@@ -211,7 +211,7 @@ onBeforeUnmount(()=> {
 
 <template>
   <div class="max-w-6xl mx-auto p-6 space-y-6">
-    <header class="bg-white rounded-xl shadow p-6">
+    <header class="bg-white rounded-xl shadow p-6 sticky top-0 z-20">
       <div class="flex flex-col gap-3">
         <h1 class="text-2xl font-bold">Steam Price Tracker</h1>
 
@@ -316,7 +316,7 @@ onBeforeUnmount(()=> {
 
         <div class="border-b mb-4"></div>
 
-        <div v-if="reviewSummary">
+        <div v-if="reviewSummary.total_reviews > 0">
           <h5 class="text-lg font-bold mb-1">{{reviewSummary.review_score_desc}}</h5>
           <p class="font-semibold text-base mb-2"> {{((reviewSummary.total_positive/reviewSummary.total_reviews)*100).toFixed(0)}}% Positive</p>
           <div class="h-2 rounded-full bg-gray-200 w-full mt-1">
@@ -329,6 +329,7 @@ onBeforeUnmount(()=> {
           <p class="text-green-600 mt-2">{{reviewSummary.total_positive.toLocaleString()}} Positive Reviews</p>
           <p class="text-red-600">{{reviewSummary.total_negative.toLocaleString()}} Negative Reviews</p>
         </div>
+        <div v-else-if="review.Summary.total_reviews === 0"> No Available Reviews</div>
       </section>
 
       <!-- EMPTY STATE -->
