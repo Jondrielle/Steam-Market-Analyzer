@@ -18,6 +18,7 @@ const selectedPeriod = ref("daily")
 const resultsBox = ref(null)
 const notificationMessage = ref(null)
 const reviewSummary = ref(null)
+const loading = ref(false)
 
 
 const selectedGameTitle = computed(()=>{
@@ -133,6 +134,7 @@ async function showPriceHistory(gameId){
   console.log("Game Selected:", gameId)
   selectedGameId.value = gameId
   try {
+    loading.value = true
     const response = await axios.get(`http://localhost:8000/games/${gameId}/price-history`, {
       params: { period: selectedPeriod.value }
     });
@@ -140,6 +142,7 @@ async function showPriceHistory(gameId){
     console.log("FULL RESPONSE:", response.data)
     priceHistory.value = response.data.prices
     console.log("APP priceHistory:", priceHistory.value)
+    loading.value = false 
   } catch (err) {
     console.error("Failed to fetch price history", err);
   }
@@ -298,13 +301,18 @@ onBeforeUnmount(()=> {
         <div class="border-b mb-4"></div>
 
         <!-- CHART -->
+        <div v-if="loading">Loading chart...</div>
+
         <PriceChart
-          v-if="selectedGameId && priceHistory.length"
+          v-else-if="selectedGameId && priceHistory.length && !loading"
           :data="priceHistory"
           :period="selectedPeriod"
           @closeChart="handleCloseChart"
           @selectPeriod="handleSetPeriod"
         />
+
+        <div v-else-if="selectedGameId"> No price history available </div>
+        
 
         <div class="border-b mb-4"></div>
 
