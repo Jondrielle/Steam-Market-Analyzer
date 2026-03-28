@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onBeforeUnmount,computed} from 'vue'
+import { ref, onMounted, onBeforeUnmount,onUnmounted,computed} from 'vue'
 import axios from 'axios'
 import GameList from './components/GameList.vue'
 import PriceChart from './components/PriceChart.vue'
@@ -221,13 +221,21 @@ async function updatePrices(){
 
 
 onMounted(()=> {
-  displayList()
-
+  interval = setInterval(async ()=> {
+    if(selectedGameId.value){
+      await showPriceHistory(selectedGameId.value)
+    }
+  }, 10000)
+  
   document.addEventListener('click',handleClickOutside)
 })
 
 onBeforeUnmount(()=> {
   document.removeEventListener('click',handleClickOutside)
+})
+
+onUnmounted(() =>{
+  clearInterval(interval)
 })
 
 
