@@ -7,6 +7,8 @@ import SearchFunction from './components/SearchFunction.vue'
 import { ChartBarSquareIcon, MagnifyingGlassIcon,TrashIcon} from '@heroicons/vue/24/outline'
 
 
+let interval
+
 const priceHistory = ref([])
 const searchName = ref('')
 const topResults = ref([])
@@ -92,7 +94,7 @@ async function addResult(item) {
     setTimeout(()=>{
       notificationMessage.value = null
       },2000)
-
+    await displayList()
   } catch (error) {
     console.error('Error adding game', error)
   }
@@ -102,6 +104,7 @@ async function addResult(item) {
 async function deleteGame(item) {
   try {
     await axios.delete(`http://localhost:8000/delete/${item.app_id}`)
+
 
     console.log("Item deleted:",item)
     gameList.value = gameList.value.filter(
@@ -119,6 +122,8 @@ async function deleteGame(item) {
     setTimeout(()=>{
       notificationMessage.value = null
       },2000)
+
+    await displayList()
   } catch (error) {
     console.error('Delete Failed', error)
   }
@@ -128,7 +133,7 @@ async function deleteGame(item) {
 async function displayList() {
   try{
     const response = await axios.get('http://localhost:8000/list')
-    gameList.value = response.data
+    gameList.value = response.data || []
   }catch(err){
     console.error("Failed to load wishlist", err)
   }
@@ -205,6 +210,7 @@ async function getGameReviewInfo(appId){
 async function updatePrices(){
   try{
     const response = await axios.post("http://localhost:8000/update-prices")
+    await displayList()
 
     await showPriceHistory(selectGameId.value)
     console.log("Response:", response.data)
@@ -213,8 +219,10 @@ async function updatePrices(){
   }
 }
 
+
 onMounted(()=> {
   displayList()
+
   document.addEventListener('click',handleClickOutside)
 })
 
