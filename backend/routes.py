@@ -15,6 +15,7 @@ results = []
 # Get top 10 matching games
 @router.get("/find")
 async def find_games(title: str, response_mode=List[Game]):
+    print("API /find CALLED")
     results = get_steam_info(title)
     print(results)
 
@@ -100,6 +101,23 @@ async def retrieve_trend(game_id: int, period: Period = Period.daily):
         "period": period, 
         "prices": prices
     }
+
+# Automate price trend daily
+@router.post("/update-prices")
+async def update_prices():
+    games = load_list()
+
+    for game in games:
+        results = get_steam_info(game["title"])
+
+        if not results:
+            continue
+
+        full_game = results[0]
+
+        addGamePriceHistory(full_game)
+
+    return {"message": "updated prices"}
 
 
 

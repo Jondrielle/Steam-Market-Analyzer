@@ -17,7 +17,11 @@ const selectedGameId = ref(null)
 const selectedPeriod = ref("daily")
 const resultsBox = ref(null)
 const notificationMessage = ref(null)
-const reviewSummary = ref(null)
+const reviewSummary = ref({
+  total_reviews:0,
+  positive:0,
+  negative:0
+})
 const loading = ref(false)
 
 
@@ -42,6 +46,7 @@ async function getReviews(appId){
 
 // REQUEST RESULTS
 async function getResults() {
+  console.log('Calling steam')
   try {
     if(searchName.value == ''){
       setTimeout(()=>{
@@ -54,7 +59,7 @@ async function getResults() {
       params: { title: searchName.value }
     })
 
-    console.log(response.data)  
+    console.log('Response:', response.data)  
     topResults.value = response.data
     showResults.value = true
   } catch (error) {
@@ -197,6 +202,17 @@ async function getGameReviewInfo(appId){
   }
 }
 
+async function updatePrices(){
+  try{
+    const response = await axios.post("http://localhost:8000/update-prices")
+
+    await showPriceHistory(selectGameId.value)
+    console.log("Response:", response.data)
+  }catch(e){
+    console.log('Error:',e)
+  }
+}
+
 onMounted(()=> {
   displayList()
   document.addEventListener('click',handleClickOutside)
@@ -301,6 +317,7 @@ onBeforeUnmount(()=> {
         <div class="border-b mb-4"></div>
 
         <!-- CHART -->
+        <button @click="updatePrices">Update Prices</button>
         <div v-if="loading">Loading chart...</div>
 
         <PriceChart
@@ -329,7 +346,7 @@ onBeforeUnmount(()=> {
           <p class="text-green-600 mt-2">{{reviewSummary.total_positive.toLocaleString()}} Positive Reviews</p>
           <p class="text-red-600">{{reviewSummary.total_negative.toLocaleString()}} Negative Reviews</p>
         </div>
-        <div v-else-if="review.Summary.total_reviews === 0"> No Available Reviews</div>
+        <div v-else-if="reviewSummary.total_reviews == 0"> No Available Reviews</div>
       </section>
 
       <!-- EMPTY STATE -->

@@ -3,6 +3,7 @@ import requests
 import csv
 from datetime import datetime
 import os
+import pandas as pd
 
 
 GAMES_FILE = "games.csv"
@@ -26,6 +27,7 @@ def clean_price(price: str) -> float:
         return 0.0
         
 def get_steam_info(game_name: str):
+    print("SEARCH FUNCTION CALLED", game_name)
     search_url = f"https://store.steampowered.com/search/?term={game_name.replace(' ', '+')}"
     response = requests.get(search_url)
     soup = BeautifulSoup(response.text, "html.parser")
@@ -105,7 +107,24 @@ def addGameToList(game_info):
             print(f"Skipped duplicate: {game_info['Title']}")
 
 def addGamePriceHistory(game_info):
+    today = datetime.utcnow().strftime("%Y-%m-%d")
+
     file_exists = os.path.exists(PRICE_HISTORY_FILE)
+
+    if file_exists:
+        df = pd.read_csv(PRICE_HISTORY_FILE)
+
+        if not df.empty:
+            df["date"] = df["date"].astype(str)
+
+            exists = df[
+                (df["app_id"].astype(str) == str(game_info["app_id"])) &
+                (df["date"] == today)
+            ]
+
+            if not exists.empty:
+                print("Already logged today for this game")
+                return 
 
     with open(PRICE_HISTORY_FILE, mode="a", newline="", encoding="utf-8") as f:
         fieldnames = [
@@ -123,7 +142,7 @@ def addGamePriceHistory(game_info):
             writer.writeheader()
 
         writer.writerow({
-            "date": datetime.now().strftime("%Y-%m-%d"),
+            "date": datetime.utcnow().strftime("%Y-%m-%d"),
             "title": game_info["title"],
             "app_id": game_info["app_id"],
             "original_price": game_info["original_price"],
