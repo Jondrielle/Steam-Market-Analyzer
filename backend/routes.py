@@ -15,9 +15,7 @@ results = []
 # Get top 10 matching games
 @router.get("/find")
 async def find_games(title: str, response_mode=List[Game]):
-    print("API /find CALLED")
     results = get_steam_info(title)
-    print(results)
 
     normalized = [
         {

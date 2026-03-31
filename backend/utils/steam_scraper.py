@@ -27,7 +27,6 @@ def clean_price(price: str) -> float:
         return 0.0
         
 def get_steam_info(game_name: str):
-    print("SEARCH FUNCTION CALLED", game_name)
     search_url = f"https://store.steampowered.com/search/?term={game_name.replace(' ', '+')}"
     response = requests.get(search_url)
     soup = BeautifulSoup(response.text, "html.parser")
@@ -49,6 +48,8 @@ def get_steam_info(game_name: str):
         if not appid:
             continue
 
+
+        # -------------------- PRICE -------------------- 
         price_block = row.find("div", class_="search_price_discount_combined")
 
         final_price = 0.0
@@ -69,6 +70,7 @@ def get_steam_info(game_name: str):
                 original_price = clean_price(original_price_div.text)
             else:
                 original_price = final_price
+
 
         results.append({
             "title": title,
@@ -99,7 +101,7 @@ def addGameToList(game_info):
 
         if game_info["AppID"] not in existing:
             writer.writerow({
-                "Title": game_info["Title"].upper(),
+                "Title": game_info["Title"],
                 "AppID": game_info["AppID"]
             })
             print(f"Added: {game_info['Title']}")
