@@ -5,10 +5,11 @@ import GameList from './components/GameList.vue'
 import PriceChart from './components/PriceChart.vue'
 import SearchFunction from './components/SearchFunction.vue'
 import { ChartBarSquareIcon, MagnifyingGlassIcon,TrashIcon} from '@heroicons/vue/24/outline'
-import notificationSound from './assets/Notification.wav'
+import notificationAudio from './assets/Notification.wav'
 
 
 let interval
+let notificationTimer = null
 
 const priceHistory = ref([])
 const searchName = ref('')
@@ -20,6 +21,7 @@ const selectedGameId = ref(null)
 const selectedPeriod = ref("daily")
 const resultsBox = ref(null)
 const notificationMessage = ref(null)
+const notificationSound = ref(null)
 const reviewSummary = ref({
   total_reviews:0,
   positive:0,
@@ -50,6 +52,12 @@ async function getReviews(appId){
 // TRIGGER NOTIFICATIONS
 function triggerNotification(message){
   notificationMessage.value = message
+
+  if(notificationSound.value){
+    notificationSound.value.volume = 0.3
+    notificationSound.value.currentTime = 0
+    notificationSound.value.play()
+  }
 
   clearTimeout(notificationTimer)
 
@@ -224,7 +232,7 @@ async function updatePrices(){
 
 onMounted( async ()=> {
   await displayList()
-  
+
   interval = setInterval(async ()=> {
     if(selectedGameId.value){
       await showPriceHistory(selectedGameId.value)
@@ -386,6 +394,9 @@ onUnmounted(() =>{
     > 
       {{notificationMessage}}
     </div>
+    <audio ref="notificationSound">
+      <source src="./assets/Notification.wav" type="audio/wav" />
+    </audio>
 
     <footer>
     </footer>
