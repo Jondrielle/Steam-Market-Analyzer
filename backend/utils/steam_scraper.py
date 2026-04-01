@@ -39,6 +39,9 @@ def get_steam_info(game_name: str):
     rows = wrapper.find_all("a", class_="search_result_row")
 
     for row in rows:
+        img_tag = row.find("img")
+        image_url = img_tag["src"] if img_tag else None
+
         title_span = row.find("span", class_="title")
         if not title_span:
             continue
@@ -75,6 +78,7 @@ def get_steam_info(game_name: str):
         results.append({
             "title": title,
             "app_id": appid,
+            "image_url": image_url,
             "original_price": original_price,
             "discount": discount,
             "final_price": final_price
@@ -133,6 +137,7 @@ def addGamePriceHistory(game_info):
             "date",
             "title",
             "app_id",
+            "image_url",
             "original_price",
             "discount",
             "final_price"
@@ -147,6 +152,7 @@ def addGamePriceHistory(game_info):
             "date": datetime.utcnow().strftime("%Y-%m-%d"),
             "title": game_info["title"],
             "app_id": game_info["app_id"],
+            "image_url": game_info["image_url"],
             "original_price": game_info["original_price"],
             "discount": game_info["discount"],
             "final_price": game_info["final_price"]
@@ -170,6 +176,7 @@ def deletePriceHistoryForDeletedGame(app_id):
             "date",
             "title",
             "app_id",
+            "image_url",
             "original_price",
             "discount",
             "final_price"

@@ -5,6 +5,7 @@ import GameList from './components/GameList.vue'
 import PriceChart from './components/PriceChart.vue'
 import SearchFunction from './components/SearchFunction.vue'
 import { ChartBarSquareIcon, MagnifyingGlassIcon,TrashIcon} from '@heroicons/vue/24/outline'
+import notificationSound from './assets/Notification.wav'
 
 
 let interval
@@ -46,14 +47,22 @@ async function getReviews(appId){
   }
 }
 
+// TRIGGER NOTIFICATIONS
+function triggerNotification(message){
+  notificationMessage.value = message
+
+  clearTimeout(notificationTimer)
+
+  notificationTimer = setTimeout(()=>{
+    notificationMessage.value = null
+  },2000)
+}
+
 // REQUEST RESULTS
 async function getResults() {
-  console.log('Calling steam')
   try {
-    if(searchName.value == ''){
-      setTimeout(()=>{
-        notificationMessage.value = `Please enter a game name to search`
-      },2000)
+    if(searchName.value == ''){ 
+      triggerNotification("Please enter a game name to search")
       return
     }
 
@@ -77,11 +86,8 @@ async function addResult(item) {
     )
 
     if(exists){
-      notificationMessage.value = `${item.title} already in your wishlist`
-      setTimeout(()=>{
-        notificationMessage.value = null
-        },2000)
-      return 
+      triggerNotification(`${item.title} already in your wishlist`)
+      return
     }
 
     await axios.post('http://localhost:8000/add', item)
@@ -89,11 +95,9 @@ async function addResult(item) {
     topResults.value = []
     showResults.value = false
     searchName.value = null
-    notificationMessage.value = `${item.title} was added`
 
-    setTimeout(()=>{
-      notificationMessage.value = null
-      },2000)
+    triggerNotification(`${item.title} was added`)
+
     await displayList()
   } catch (error) {
     console.error('Error adding game', error)
@@ -117,11 +121,8 @@ async function deleteGame(item) {
       priceHistory.value = []
     }
 
-    notificationMessage.value = `${item.title} was deleted`
 
-    setTimeout(()=>{
-      notificationMessage.value = null
-      },2000)
+    triggerNotification(`${item.title} was deleted`)
 
     await displayList()
   } catch (error) {
@@ -280,7 +281,7 @@ onUnmounted(() =>{
                 @click="addResult(item)"
               >
                 <img 
-                  :src="getGameImage(item.app_id)" 
+                  :src="item.image_url" 
                   class="w-20 rounded"/>
 
                 <span class="getGameReviewInfo(item.app_id)">{{ item.title}}</span>

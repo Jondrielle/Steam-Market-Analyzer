@@ -7,6 +7,7 @@ from enum import Enum
 class Game(BaseModel):
     title: str = Field(alias="Title")
     app_id: str
+    image_url: Optional[str] = None
     original_price: float = Field(alias="Original Price")
     discount: str = Field(alias="Discount")
     final_price: float = Field(alias="Final Price")

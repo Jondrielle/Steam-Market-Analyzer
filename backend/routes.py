@@ -21,6 +21,7 @@ async def find_games(title: str, response_mode=List[Game]):
         {
             "title": game["title"],
             "app_id": game["app_id"],
+            "image_url": game["image_url"],
             "original_price": game["original_price"],
             "discount": game["discount"],
             "final_price": game["final_price"]
