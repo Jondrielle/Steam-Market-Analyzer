@@ -102,7 +102,7 @@ async function addResult(item) {
     gameList.value.push(item)
     topResults.value = []
     showResults.value = false
-    searchName.value = null
+    searchName.value = ""
 
     triggerNotification(`${item.title} was added`)
 
