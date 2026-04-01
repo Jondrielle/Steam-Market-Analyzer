@@ -1,4 +1,1 @@
-date,title,app_id,original_price,discount,final_price
-2026-03-09,Go,3285490,7.99,0%,7.99
-2026-03-10,Go,3285490,7.99,0%,7.99
-2026-03-10,Rust,252490,39.99,0%,39.99
+date,title,app_id,image_url,original_price,discount,final_price

@@ -16,12 +16,12 @@ results = []
 @router.get("/find")
 async def find_games(title: str, response_mode=List[Game]):
     results = get_steam_info(title)
-    print(results)
 
     normalized = [
         {
             "title": game["title"],
             "app_id": game["app_id"],
+            "image_url": game["image_url"],
             "original_price": game["original_price"],
             "discount": game["discount"],
             "final_price": game["final_price"]
@@ -54,6 +54,21 @@ async def add_game(request: TitleRequest):
 async def get_list():
     return load_list()
 
+@router.get("/reviews/{app_id}")
+def get_reviews(app_id: int):
+    import requests
+
+    url = f"https://store.steampowered.com/appreviews/{app_id}"
+
+    params = {
+        "json": 1,
+        "language": "all",
+        "purchase_type": "all"
+    }
+
+    response = requests.get(url, params=params)
+    return response.json()
+
 # Delete game from list tracker 
 @router.delete("/delete/{game_id}")
 async def delete_game(game_id: str):
@@ -85,6 +100,23 @@ async def retrieve_trend(game_id: int, period: Period = Period.daily):
         "period": period, 
         "prices": prices
     }
+
+# Automate price trend daily
+@router.post("/update-prices")
+async def update_prices():
+    games = load_list()
+
+    for game in games:
+        results = get_steam_info(game["title"])
+
+        if not results:
+            continue
+
+        full_game = results[0]
+
+        addGamePriceHistory(full_game)
+
+    return {"message": "updated prices"}
 
 
 

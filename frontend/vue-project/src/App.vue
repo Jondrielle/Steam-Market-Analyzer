@@ -1,11 +1,15 @@
 <script setup>
-import { ref, onMounted, onBeforeUnmount,computed} from 'vue'
+import { ref, onMounted, onBeforeUnmount,onUnmounted,computed} from 'vue'
 import axios from 'axios'
 import GameList from './components/GameList.vue'
 import PriceChart from './components/PriceChart.vue'
 import SearchFunction from './components/SearchFunction.vue'
 import { ChartBarSquareIcon, MagnifyingGlassIcon,TrashIcon} from '@heroicons/vue/24/outline'
+import notificationAudio from './assets/Notification.wav'
 
+
+let interval
+let notificationTimer = null
 
 const priceHistory = ref([])
 const searchName = ref('')
@@ -17,6 +21,13 @@ const selectedGameId = ref(null)
 const selectedPeriod = ref("daily")
 const resultsBox = ref(null)
 const notificationMessage = ref(null)
+const notificationSound = ref(null)
+const reviewSummary = ref({
+  total_reviews:0,
+  positive:0,
+  negative:0
+})
+const loading = ref(false)
 
 
 const selectedGameTitle = computed(()=>{
@@ -24,13 +35,42 @@ const selectedGameTitle = computed(()=>{
   return game ? game.title : ""
 })
 
+async function getReviews(appId){
+  console.log("Game id is:", appId)
+  try{
+    const response = await axios.get(`http://localhost:8000/reviews/${appId}`)
+
+    reviewSummary.value = response.data.query_summary
+    console.log("Review:", reviewSummary.value)
+
+  }catch(error){
+    console.error("Failed to fetch reviews",error)
+    console.log(error.response)
+  }
+}
+
+// TRIGGER NOTIFICATIONS
+function triggerNotification(message){
+  notificationMessage.value = message
+
+  if(notificationSound.value){
+    notificationSound.value.volume = 0.3
+    notificationSound.value.currentTime = 0
+    notificationSound.value.play()
+  }
+
+  clearTimeout(notificationTimer)
+
+  notificationTimer = setTimeout(()=>{
+    notificationMessage.value = null
+  },2000)
+}
+
 // REQUEST RESULTS
 async function getResults() {
   try {
-    if(searchName.value == ''){
-      setTimeout(()=>{
-        notificationMessage.value = `Please enter a game name to search`
-      },2000)
+    if(searchName.value == ''){ 
+      triggerNotification("Please enter a game name to search")
       return
     }
 
@@ -38,7 +78,7 @@ async function getResults() {
       params: { title: searchName.value }
     })
 
-    console.log(response.data)  
+    console.log('Response:', response.data)  
     topResults.value = response.data
     showResults.value = true
   } catch (error) {
@@ -54,24 +94,19 @@ async function addResult(item) {
     )
 
     if(exists){
-      notificationMessage.value = `${item.title} already in your wishlist`
-      setTimeout(()=>{
-        notificationMessage.value = null
-        },2000)
-      return 
+      triggerNotification(`${item.title} already in your wishlist`)
+      return
     }
 
     await axios.post('http://localhost:8000/add', item)
     gameList.value.push(item)
     topResults.value = []
     showResults.value = false
-    searchName.value = null
-    notificationMessage.value = `${item.title} was added`
+    searchName.value = ""
 
-    setTimeout(()=>{
-      notificationMessage.value = null
-      },2000)
+    triggerNotification(`${item.title} was added`)
 
+    await displayList()
   } catch (error) {
     console.error('Error adding game', error)
   }
@@ -81,6 +116,7 @@ async function addResult(item) {
 async function deleteGame(item) {
   try {
     await axios.delete(`http://localhost:8000/delete/${item.app_id}`)
+
 
     console.log("Item deleted:",item)
     gameList.value = gameList.value.filter(
@@ -93,11 +129,10 @@ async function deleteGame(item) {
       priceHistory.value = []
     }
 
-    notificationMessage.value = `${item.title} was deleted`
 
-    setTimeout(()=>{
-      notificationMessage.value = null
-      },2000)
+    triggerNotification(`${item.title} was deleted`)
+
+    await displayList()
   } catch (error) {
     console.error('Delete Failed', error)
   }
@@ -107,7 +142,7 @@ async function deleteGame(item) {
 async function displayList() {
   try{
     const response = await axios.get('http://localhost:8000/list')
-    gameList.value = response.data
+    gameList.value = response.data || []
   }catch(err){
     console.error("Failed to load wishlist", err)
   }
@@ -118,6 +153,7 @@ async function showPriceHistory(gameId){
   console.log("Game Selected:", gameId)
   selectedGameId.value = gameId
   try {
+    loading.value = true
     const response = await axios.get(`http://localhost:8000/games/${gameId}/price-history`, {
       params: { period: selectedPeriod.value }
     });
@@ -125,9 +161,12 @@ async function showPriceHistory(gameId){
     console.log("FULL RESPONSE:", response.data)
     priceHistory.value = response.data.prices
     console.log("APP priceHistory:", priceHistory.value)
+    loading.value = false 
   } catch (err) {
     console.error("Failed to fetch price history", err);
   }
+
+  await getReviews(gameId)
 }
 
 // TOGGLE SHOW GAME LIST 
@@ -164,7 +203,8 @@ function handleClickOutside(event){
 }
 
 function getGameImage(appId){
-  return `https://cdn.cloudflare.steamstatic.com/steam/apps/${appId}/capsule_sm_120.jpg`
+  console.log("App ID:", appId )
+  return `https://cdn.cloudflare.steamstatic.com/steam/apps/${appId}/header.jpg` || `https://cdn.akamai.steamstatic.com/steam/apps/${appId}/capsule_616x353.jpg`
 }
 
 async function getGameReviewInfo(appId){
@@ -177,8 +217,28 @@ async function getGameReviewInfo(appId){
   }
 }
 
-onMounted(()=> {
-  displayList()
+async function updatePrices(){
+  try{
+    const response = await axios.post("http://localhost:8000/update-prices")
+    await displayList()
+
+    await showPriceHistory(selectGameId.value)
+    console.log("Response:", response.data)
+  }catch(e){
+    console.log('Error:',e)
+  }
+}
+
+
+onMounted( async ()=> {
+  await displayList()
+
+  interval = setInterval(async ()=> {
+    if(selectedGameId.value){
+      await showPriceHistory(selectedGameId.value)
+    }
+  }, 10000)
+  
   document.addEventListener('click',handleClickOutside)
 })
 
@@ -186,12 +246,16 @@ onBeforeUnmount(()=> {
   document.removeEventListener('click',handleClickOutside)
 })
 
+onUnmounted(() =>{
+  clearInterval(interval)
+})
+
 
 </script>
 
 <template>
   <div class="max-w-6xl mx-auto p-6 space-y-6">
-    <header class="bg-white rounded-xl shadow p-6">
+    <header class="bg-white rounded-xl shadow p-6 sticky top-0 z-20">
       <div class="flex flex-col gap-3">
         <h1 class="text-2xl font-bold">Steam Price Tracker</h1>
 
@@ -199,6 +263,7 @@ onBeforeUnmount(()=> {
             <input 
               v-model="searchName" 
               placeholder="Enter game name"
+              @keyup.enter="getResults"
               class="border rounded-xl px-3 py-2 flex-1"
             />
 
@@ -206,7 +271,7 @@ onBeforeUnmount(()=> {
               class="flex items-center gap-2 px-4 bg-sky-500 text-white rounded-lg hover:bg-sky-600 transition" 
               @click="getResults">
                 <MagnifyingGlassIcon 
-                  class="size-5 "/>
+                  class="size-5"/>
                   Search
             </button>
           </div>
@@ -220,13 +285,13 @@ onBeforeUnmount(()=> {
             <h3 class="font-semibold mb-2">Results</h3>
             <ul class="grid grid-cols-2 gap-2">
               <li 
-                class="p-2 rounded cursor-pointer hover:bg-sky-100 transition"  
+                class="p-2 rounded cursor-pointer hover:bg-sky-100 transition-all duration-150 hover:scale-120 active:scale-90"  
                 v-for="item in topResults" 
                 :key="item.app_id"
                 @click="addResult(item)"
               >
                 <img 
-                  :src="getGameImage(item.app_id)" 
+                  :src="item.image_url" 
                   class="w-20 rounded"/>
 
                 <span class="getGameReviewInfo(item.app_id)">{{ item.title}}</span>
@@ -280,13 +345,36 @@ onBeforeUnmount(()=> {
         <div class="border-b mb-4"></div>
 
         <!-- CHART -->
+        <button @click="updatePrices">Update Prices</button>
+        <div v-if="loading">Loading chart...</div>
+
         <PriceChart
-          v-if="selectedGameId && priceHistory.length"
+          v-else-if="selectedGameId && priceHistory.length && !loading"
           :data="priceHistory"
           :period="selectedPeriod"
           @closeChart="handleCloseChart"
           @selectPeriod="handleSetPeriod"
         />
+
+        <div v-else-if="selectedGameId"> No price history available </div>
+        
+
+        <div class="border-b mb-4"></div>
+
+        <div v-if="reviewSummary.total_reviews > 0">
+          <h5 class="text-lg font-bold mb-1">{{reviewSummary.review_score_desc}}</h5>
+          <p class="font-semibold text-base mb-2"> {{((reviewSummary.total_positive/reviewSummary.total_reviews)*100).toFixed(0)}}% Positive</p>
+          <div class="h-2 rounded-full bg-gray-200 w-full mt-1">
+            <div 
+            class="h-2 rounded-full bg-green-500"
+            :style="{ width:((reviewSummary.total_positive /reviewSummary.total_reviews) * 100) + '%' }"
+            >
+            </div>
+          </div>
+          <p class="text-green-600 mt-2">{{reviewSummary.total_positive.toLocaleString()}} Positive Reviews</p>
+          <p class="text-red-600">{{reviewSummary.total_negative.toLocaleString()}} Negative Reviews</p>
+        </div>
+        <div v-else-if="reviewSummary.total_reviews == 0"> No Available Reviews</div>
       </section>
 
       <!-- EMPTY STATE -->
@@ -306,6 +394,9 @@ onBeforeUnmount(()=> {
     > 
       {{notificationMessage}}
     </div>
+    <audio ref="notificationSound">
+      <source src="./assets/Notification.wav" type="audio/wav" />
+    </audio>
 
     <footer>
     </footer>

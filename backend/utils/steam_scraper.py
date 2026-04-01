@@ -3,6 +3,7 @@ import requests
 import csv
 from datetime import datetime
 import os
+import pandas as pd
 
 
 GAMES_FILE = "games.csv"
@@ -38,6 +39,9 @@ def get_steam_info(game_name: str):
     rows = wrapper.find_all("a", class_="search_result_row")
 
     for row in rows:
+        img_tag = row.find("img")
+        image_url = img_tag["src"] if img_tag else None
+
         title_span = row.find("span", class_="title")
         if not title_span:
             continue
@@ -47,6 +51,8 @@ def get_steam_info(game_name: str):
         if not appid:
             continue
 
+
+        # -------------------- PRICE -------------------- 
         price_block = row.find("div", class_="search_price_discount_combined")
 
         final_price = 0.0
@@ -68,9 +74,11 @@ def get_steam_info(game_name: str):
             else:
                 original_price = final_price
 
+
         results.append({
             "title": title,
             "app_id": appid,
+            "image_url": image_url,
             "original_price": original_price,
             "discount": discount,
             "final_price": final_price
@@ -97,7 +105,7 @@ def addGameToList(game_info):
 
         if game_info["AppID"] not in existing:
             writer.writerow({
-                "Title": game_info["Title"].upper(),
+                "Title": game_info["Title"],
                 "AppID": game_info["AppID"]
             })
             print(f"Added: {game_info['Title']}")
@@ -105,13 +113,31 @@ def addGameToList(game_info):
             print(f"Skipped duplicate: {game_info['Title']}")
 
 def addGamePriceHistory(game_info):
+    today = datetime.utcnow().strftime("%Y-%m-%d")
+
     file_exists = os.path.exists(PRICE_HISTORY_FILE)
+
+    if file_exists:
+        df = pd.read_csv(PRICE_HISTORY_FILE)
+
+        if not df.empty:
+            df["date"] = df["date"].astype(str)
+
+            exists = df[
+                (df["app_id"].astype(str) == str(game_info["app_id"])) &
+                (df["date"] == today)
+            ]
+
+            if not exists.empty:
+                print("Already logged today for this game")
+                return 
 
     with open(PRICE_HISTORY_FILE, mode="a", newline="", encoding="utf-8") as f:
         fieldnames = [
             "date",
             "title",
             "app_id",
+            "image_url",
             "original_price",
             "discount",
             "final_price"
@@ -123,9 +149,10 @@ def addGamePriceHistory(game_info):
             writer.writeheader()
 
         writer.writerow({
-            "date": datetime.now().strftime("%Y-%m-%d"),
+            "date": datetime.utcnow().strftime("%Y-%m-%d"),
             "title": game_info["title"],
             "app_id": game_info["app_id"],
+            "image_url": game_info["image_url"],
             "original_price": game_info["original_price"],
             "discount": game_info["discount"],
             "final_price": game_info["final_price"]
@@ -149,6 +176,7 @@ def deletePriceHistoryForDeletedGame(app_id):
             "date",
             "title",
             "app_id",
+            "image_url",
             "original_price",
             "discount",
             "final_price"
