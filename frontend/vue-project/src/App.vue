@@ -222,7 +222,9 @@ async function updatePrices(){
 }
 
 
-onMounted(()=> {
+onMounted( async ()=> {
+  await displayList()
+  
   interval = setInterval(async ()=> {
     if(selectedGameId.value){
       await showPriceHistory(selectedGameId.value)
