@@ -255,12 +255,12 @@ onUnmounted(() =>{
 
 <template>
 
-  <div class="min-h-screen bg-gray-100 flex justify-center w-full overflow-x-hidden">
+  <div class="min-h-screen bg-gray-100 flex justify-center overflow-hidden">
 
-    <div class="w-full max-w-5xl  px-4 py-6 space-y-8">
+    <div class="w-full max-w-5xl px-4 pt-24 pb-6 space-y-8">
       
       <!-- HEADER -->
-      <header class="w-full bg-white rounded-xl shadow-md p-6 sticky top-24 z-20"> 
+      <header class="bg-white rounded-xl shadow-md p-6 sticky top-0 z-20"> 
 
         <h1 class="text-2xl font-bold text-gray-800">Steam Price Tracker</h1>
 
@@ -307,14 +307,15 @@ onUnmounted(() =>{
         </div>
       </header>
 
+      <div class="p-2"></div>
+
       <!-- DASHBOARD -->
-      <main class="grid grid-cols-1 md:grid-cols-[240px_1fr)] gap-6 p-4 items-start">
+      <main class="grid grid-cols-2 md:grid-cols-[220px_1fr)] gap-6 items-start">
 
         <!-- SIDEBAR / WISHLIST -->
-        <aside class="bg-white rounded-xl shadow-md p-4 h-fit sticky top-40">
+        <aside class="bg-white rounded-xl shadow-md p-4 h-fit">
 
           <div class="flex justify-between items-center mb-4">
-
             <h2 class="font-semibold text-gray-800">Wishlist</h2>
 
             <button 
@@ -335,9 +336,8 @@ onUnmounted(() =>{
         </aside>
 
         <!-- MAIN CONTENT -->  
-        <div class="min-w-0">
           <section 
-          class="bg-white rounded-xl shadow-md p-6 space-y-6 " 
+          class="bg-white rounded-xl shadow-md p-6 space-y-6 top-55" 
           v-if="selectedGameId && priceHistory.length">
 
             <!-- TITLE -->
@@ -406,11 +406,10 @@ onUnmounted(() =>{
           <!-- EMPTY STATE -->
           <section 
             v-else
-            class="bg-white rounded-xl shadow-md top-20 p-6 flex flex-col justify-center text-gray-500 text-center min-h-[400px]"
+            class="bg-white rounded-xl shadow-md top-20 p-6 flex flex-col justify-center text-gray-500 text-center min-h-[400px] top-30"
           >
           Select a game from your wishlist to view price history 
           </section>
-        </div>
     </main>
           
     <!-- TOAST NOTIFICATIONS -->
