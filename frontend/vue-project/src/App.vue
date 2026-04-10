@@ -255,165 +255,162 @@ onUnmounted(() =>{
 
 <template>
 
-  <!-- PAGE BACKGROUND -->
-  <div class="min-h-screen w-300 bg-gray-100 px-8">
+  <div class="min-h-screen bg-gray-100 flex justify-center w-full overflow-x-hidden">
 
-    <div class="max-w-5xl mx-auto p-6 space-y-8">
-
+    <div class="w-full max-w-5xl  px-4 py-6 space-y-8">
+      
       <!-- HEADER -->
-      <header class="bg-white rounded-xl shadow-md p-6 sticky top-0 z-20">
+      <header class="w-full bg-white rounded-xl shadow-md p-6 sticky top-24 z-20"> 
 
-        <div class="flex flex-col gap-4">
+        <h1 class="text-2xl font-bold text-gray-800">Steam Price Tracker</h1>
 
-          <h1 class="text-2xl font-bold text-gray-800">Steam Price Tracker</h1>
-
-            <div class="flex gap-2">
+        <!-- SEARCH BAR -->
+        <div class="flex gap-2">
               <input 
                 v-model="searchName" 
                 placeholder="Enter game name"
                 @keyup.enter="getResults"
                 class="border rounded-xl px-4 py-2 flex-1 focus:outline-none focus:ring-2 focus:ring-sky-400"
               />
-
               <button 
                 class="flex items-center gap-2 px-4 bg-sky-500 text-white rounded-xl hover:bg-sky-600 transition shadow-sm" 
                 @click="getResults">
-                  <MagnifyingGlassIcon 
-                    class="size-5"/>
-                    Search
+                <MagnifyingGlassIcon 
+                  class="size-5"/>
+              Search  
               </button>
-            </div>
-                
-            <!-- SEARCH RESULTS -->
-            <div 
-              ref="resultsBox" 
-              v-if="showResults && topResults.length"
-              class="border rounded-xl p-4 bg-white shadow"
-            >
-              <h3 class="font-semibold mb-3 text-gray-700">Results</h3>
-              <ul class="grid grid-cols-2 gap-3">
-                <li 
-                  class="p-3 rounded-lg cursor-pointer hover:bg-sky-100 transition transform hover:scale-105 active:scale-95 flex items-center gap-3"  
-                  v-for="item in topResults" 
-                  :key="item.app_id"
-                  @click="addResult(item)"
-                >
-                  <img 
-                    :src="item.image_url" 
-                    class="w-16 rounded"/>
+        </div>
 
-                  <span class="text-sm font-medium text-gray-800"
-                  @click.stop="getGameReviewInfo(item.app_id)">{{ item.title}}</span>
-                </li>
-              </ul>
-            </div>
-          </div>
+        <!-- SEARCH RESULTS -->
+        <div 
+          ref="resultsBox" 
+            v-if="showResults && topResults.length"
+            class="absolute left-0 right-0 mt-2 border rounded-xl p-4 bg-white shadow-lg z-30 max-h-80 overflow-y-auto"
+        >
+          <h3 class="font-semibold mb-3 text-gray-700">Results</h3>
+            <ul class="grid grid-cols-2 gap-3">
+              <li 
+                class="p-3 rounded-lg cursor-pointer hover:bg-sky-100 transition transform hover:scale-105 active:scale-95 flex items-center gap-3"  
+                v-for="item in topResults" 
+                :key="item.app_id"
+                @click="addResult(item)"
+              >
+              <img 
+                :src="item.image_url" 
+                class="w-16 rounded"/>
+
+                <span class="text-sm font-medium text-gray-800"
+                @click.stop="getGameReviewInfo(item.app_id)">{{ item.title}}
+                </span>
+              </li>
+            </ul>
+        </div>
       </header>
 
-    <!-- DASHBOARD -->
-    <main class="grid grid-cols-[280px_1fr] gap-6">
+      <!-- DASHBOARD -->
+      <main class="grid grid-cols-1 md:grid-cols-[240px_1fr)] gap-6 p-4 items-start">
 
-      <!-- SIDEBAR / WISHLIST -->
-       <aside class="bg-white rounded-xl shadow-md p-4 h-fit sticky top-50">
+        <!-- SIDEBAR / WISHLIST -->
+        <aside class="bg-white rounded-xl shadow-md p-4 h-fit sticky top-40">
 
           <div class="flex justify-between items-center mb-4">
 
             <h2 class="font-semibold text-gray-800">Wishlist</h2>
 
-          <button 
-            class="text-sm text-sky-600 hover:underline"
-            @click="toggleShow"
-          >
-            {{ showList ? "Hide" : "Show"}}
-          </button>
-        </div>
-
-        <!-- SAVED LIST -->
-        <GameList
-          v-if="showList"
-          :gameList="gameList"
-          @showPriceHistory="showPriceHistory"
-          @deleteGame="deleteGame"
-        />
-      </aside>
-
-      <!-- MAIN CONTENT / CHART -->
-      <section
-        class="bg-white rounded-xl shadow-md p-6 space-y-6" 
-        v-if="selectedGameId && priceHistory.length"
-      >
-        <!-- TITLE -->
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-xl font-bold text-gray-800">
-            {{selectedGameTitle}} Price History
-          </h2>
-
-          <span class="text-sm text-gray-500 capitalize">
-            {{selectedPeriod}}
-          </span>
-        </div>
-
-        <div class="border-b border-gray-200"></div>
-
-        <!-- CHART -->
-        <button 
-          @click="updatePrices"
-          class="px-3 py-1 bg-sky-500 text-white rounded-lg hover:bg-sky-600"
-        >Update Prices</button>
-
-        
-        <div v-if="loading" class="space-y-4 animate-pulse">
-
-        <div class="h-6 bg-gray-300 rounded w-1/3"></div>
-
-        <div class="h-64 bg-gray-300 rounded-xl"></div>
-
-        <div class="space-y-2">
-        <div class="h-4 bg-gray-300 rounded w-1/2"></div>
-        <div class="h-4 bg-gray-300 rounded w-1/3"></div>
-        </div>
-
-        </div>
-        <PriceChart
-          v-else-if="selectedGameId && priceHistory.length && !loading"
-          :data="priceHistory"
-          :period="selectedPeriod"
-          @closeChart="handleCloseChart"
-          @selectPeriod="handleSetPeriod"
-          class="text-gray-500"
-        />
-
-        <div v-else-if="selectedGameId"> No price history available </div>
-        
-
-        <div class="border-b border-gray-200"></div>
-
-        <!-- REVIEWS -->
-
-        <div v-if="reviewSummary.total_reviews > 0">
-          <h5 class="text-lg font-bold mb-2 text-gray-800">{{reviewSummary.review_score_desc}}</h5>
-          <p class="font-semibold text-base mb-2"> {{((reviewSummary.total_positive/reviewSummary.total_reviews)*100).toFixed(0)}}% Positive</p>
-          <div class="h-2 rounded-full bg-gray-200 w-full">
-            <div 
-            class="h-2 rounded-full bg-green-500"
-            :style="{ width:((reviewSummary.total_positive /reviewSummary.total_reviews) * 100) + '%' }"
+            <button 
+              class="text-sm text-sky-600 hover:underline"
+              @click="toggleShow"
             >
-            </div>
+              {{ showList ? "Hide" : "Show"}}
+            </button>
           </div>
-          <p class="text-green-600 mt-2">{{reviewSummary.total_positive.toLocaleString()}} Positive Reviews</p>
-          <p class="text-red-600">{{reviewSummary.total_negative.toLocaleString()}} Negative Reviews</p>
-        </div>
-        <div v-else-if="reviewSummary.total_reviews == 0" class="text-gray-500"> No Available Reviews</div>
-      </section>
 
-      <!-- EMPTY STATE -->
-        <section 
-          v-else
-          class="bg-white rounded-xl shadow-md p-6 flex items-center justify-center text-gray-500"
-        >
-        Select a game from your wishlist to view price history 
+          <!-- SAVED LIST -->
+          <GameList
+            v-if="showList"
+            :gameList="gameList"
+            @showPriceHistory="showPriceHistory"
+            @deleteGame="deleteGame"
+          />
+        </aside>
+
+        <!-- MAIN CONTENT -->  
+        <div class="min-w-0">
+          <section 
+          class="bg-white rounded-xl shadow-md p-6 space-y-6 " 
+          v-if="selectedGameId && priceHistory.length">
+
+            <!-- TITLE -->
+            <div class="flex justify-between items-center mb-4">
+              <h2 class="text-xl font-bold text-gray-800">
+                {{selectedGameTitle}} Price History
+              </h2>
+
+              <span class="text-sm text-gray-500 capitalize">
+                {{selectedPeriod}}
+              </span>
+            </div>
+
+            <div class="border-b border-gray-200"></div>
+
+            <!-- CHART -->
+            <div v-if="loading" class="space-y-4 animate-pulse">
+
+              <div class="h-6 bg-gray-300 rounded w-1/3"></div>
+
+              <div class="h-64 bg-gray-300 rounded-xl"></div>
+
+              <div class="space-y-2">
+                <div class="h-4 bg-gray-300 rounded w-1/2"></div>
+                <div class="h-4 bg-gray-300 rounded w-1/3"></div>
+              </div>
+            </div>
+
+            <PriceChart
+              v-else-if="selectedGameId && priceHistory.length && !loading"
+              :data="priceHistory"
+              :period="selectedPeriod"
+              @closeChart="handleCloseChart"
+              @selectPeriod="handleSetPeriod"
+              class="text-gray-500"
+            />
+
+            <div v-else-if="selectedGameId"> No price history available </div>
+            
+            <div class="border-b border-gray-200"></div>
+
+          <!-- REVIEWS -->
+          <div v-if="reviewSummary.total_reviews > 0">
+            <h5 class="text-lg font-bold mb-2 text-gray-800">{{reviewSummary.review_score_desc}}</h5>
+
+            <p class="font-semibold text-base mb-2"> {{((reviewSummary.total_positive/reviewSummary.total_reviews)*100).toFixed(0)}}% Positive</p>
+
+            <div class="h-2 rounded-full bg-gray-200 w-full">
+              <div 
+              class="h-2 rounded-full bg-green-500"
+              :style="{ width:((reviewSummary.total_positive /reviewSummary.total_reviews) * 100) + '%' }"
+              >
+              </div>
+            </div>
+
+            <p class="text-green-600 mt-2">{{reviewSummary.total_positive.toLocaleString()}} Positive Reviews</p>
+            
+            <p class="text-red-600">{{reviewSummary.total_negative.toLocaleString()}} Negative Reviews</p>
+
+          </div>
+
+          <div v-else-if="reviewSummary.total_reviews == 0" class="text-gray-500"> No Available Reviews</div>
+
         </section>
 
+          <!-- EMPTY STATE -->
+          <section 
+            v-else
+            class="bg-white rounded-xl shadow-md top-20 p-6 flex flex-col justify-center text-gray-500 text-center min-h-[400px]"
+          >
+          Select a game from your wishlist to view price history 
+          </section>
+        </div>
     </main>
           
     <!-- TOAST NOTIFICATIONS -->
@@ -427,8 +424,18 @@ onUnmounted(() =>{
       <source src="./assets/Notification.wav" type="audio/wav" />
     </audio>
 
-    <footer>
-    </footer>
-    </div>
-  </div>
+    </div> <!-- 2ND OUTER MOST DIV -->
+  </div> <!-- 1ST OUTER MOST DIV -->
 </template>
+
+
+
+                  
+
+
+
+      
+
+
+
+ 
