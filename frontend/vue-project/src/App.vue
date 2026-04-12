@@ -254,39 +254,37 @@ onUnmounted(() =>{
 </script>
 
 <template>
+  <div class="min-h-screen flex justify-center items-center">
 
-  <div class="min-h-screen bg-gray-100 flex justify-center overflow-hidden">
-
-    <div class="w-full max-w-5xl px-4 pt-24 pb-6 space-y-8">
-      
+    <div class="bg-gray-100 rounded-xl w-full max-w-5xl px-4 pt-28 pb-6 space-y-8">
       <!-- HEADER -->
       <header class="bg-white rounded-xl shadow-md p-6 sticky top-0 z-20"> 
 
-        <h1 class="text-2xl font-bold text-gray-800">Steam Price Tracker</h1>
+      <h1 class="text-2xl font-bold text-gray-800">Steam Price Tracker</h1>
 
-        <!-- SEARCH BAR -->
-        <div class="flex gap-2">
-              <input 
-                v-model="searchName" 
-                placeholder="Enter game name"
-                @keyup.enter="getResults"
-                class="border rounded-xl px-4 py-2 flex-1 focus:outline-none focus:ring-2 focus:ring-sky-400"
-              />
-              <button 
-                class="flex items-center gap-2 px-4 bg-sky-500 text-white rounded-xl hover:bg-sky-600 transition shadow-sm" 
-                @click="getResults">
-                <MagnifyingGlassIcon 
-                  class="size-5"/>
-              Search  
-              </button>
-        </div>
+      <!-- SEARCH BAR -->
+      <div class="flex gap-2">
+        <input 
+          v-model="searchName" 
+          placeholder="Enter game name"
+          @keyup.enter="getResults"
+          class="border rounded-xl px-4 py-2 flex-1 focus:outline-none focus:ring-2 focus:ring-sky-400"
+        />
+          <button 
+            class="flex items-center gap-2 px-4 bg-sky-500 text-white rounded-xl hover:bg-sky-600 transition shadow-sm" 
+            @click="getResults">
+            <MagnifyingGlassIcon 
+              class="size-5"/>
+          Search  
+          </button>
+      </div>
 
-        <!-- SEARCH RESULTS -->
-        <div 
-          ref="resultsBox" 
-            v-if="showResults && topResults.length"
-            class="absolute left-0 right-0 mt-2 border rounded-xl p-4 bg-white shadow-lg z-30 max-h-80 overflow-y-auto"
-        >
+      <!-- SEARCH RESULTS -->
+      <div 
+        ref="resultsBox" 
+        v-if="showResults && topResults.length"
+        class="absolute left-0 right-0 mt-2 border rounded-xl p-4 bg-white shadow-lg z-30 max-h-80 overflow-y-auto"
+      >
           <h3 class="font-semibold mb-3 text-gray-700">Results</h3>
             <ul class="grid grid-cols-2 gap-3">
               <li 
