@@ -186,6 +186,46 @@ def deletePriceHistoryForDeletedGame(app_id):
         writer.writeheader()
         writer.writerows(rows)
 
+def retrievePriceFile():
+    if not os.path.exists(PRICE_HISTORY_FILE):
+        return []
+
+    with open(PRICE_HISTORY_FILE, "r", newline="") as f:
+        reader = csv.DictReader(f)
+        return list(reader)
+
+def retrieveGameFile():
+    games = []
+    if os.path.exists(GAMES_FILE):
+        try:
+            with open(GAMES_FILE, "r", newline="") as f:
+                reader = csv.DictReader(f)
+                games = list(reader)
+            return games
+        except FileNotFoundError:
+            print("File not found")
+            return []
+
+# --------------------------------------------------
+# Get current prices
+# --------------------------------------------------
+
+def get_current_prices(app_id):
+    search_url = f"https://store.steampowered.com/app/{app_id}/"
+    # print(search_url)
+    response = requests.get(search_url)
+    soup = BeautifulSoup(response.text,"html.parser")
+
+    price = (
+        soup.find(class_="game_purchase_price")
+        or soup.find(class_="discount_final_price")
+    )
+
+    clean_price = (price.text.strip()).replace("$","")
+    # print(f"clean price {clean_price}")
+    
+    return clean_price
+
 
 # --- MAIN ---
 if __name__ == "__main__":

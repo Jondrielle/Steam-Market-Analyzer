@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Query,HTTPException
-from utils.steam_scraper import get_steam_info, addGameToList, addGamePriceHistory, deletePriceHistoryForDeletedGame
+from utils.steam_scraper import get_current_prices,retrievePriceFile,retrieveGameFile, get_steam_info, addGameToList, addGamePriceHistory, deletePriceHistoryForDeletedGame
 from models import Game,GameListResponse,PricePoint,PriceHistoryResponse,Period,ListGame,TitleRequest
 from typing import List
 from utils.analyze_data import (load_price_history,filter_game_by_id,aggregate_prices)
 from utils.list import save_game_to_list,load_list,delete_game_from_list
+from datetime import datetime
 
 router = APIRouter()
 
@@ -79,10 +80,6 @@ async def delete_game(game_id: str):
         raise HTTPException(status_code=404, detail="Game not found")
     return {"message": "Game removed"}
 
-# Get all game list 
-@router.get("/list", response_model=list[ListGame])
-async def get_list():
-    return load_list()
 
 # Aggregrate price trend
 @router.get("/games/{game_id}/price-history", response_model=PriceHistoryResponse)
@@ -101,23 +98,34 @@ async def retrieve_trend(game_id: int, period: Period = Period.daily):
         "prices": prices
     }
 
-# Automate price trend daily
+
 @router.post("/update-prices")
 async def update_prices():
     games = load_list()
 
+    today = datetime.now().date().isoformat()
+
+    if not games:
+        return {"message": "No games to update"}
+
     for game in games:
-        results = get_steam_info(game["title"])
+        app_id = game["app_id"]
 
-        if not results:
-            continue
+        current_price = get_current_prices(app_id)
 
-        full_game = results[0]
+        #imageUrl = game["image_url"]
 
-        addGamePriceHistory(full_game)
+        print(game)
 
-    return {"message": "updated prices"}
+        game_data = {
+            "title": game.get("title", "Unknown"),
+            "app_id": app_id,
+            "image_url": "",  # optional improvement later
+            "original_price": current_price,
+            "discount": "0%",
+            "final_price": current_price
+        }
 
+        addGamePriceHistory(game_data)
 
-
-    
+    return {"message": "Prices updated"}
