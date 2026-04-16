@@ -222,7 +222,7 @@ async function updatePrices(){
     const response = await axios.post("http://localhost:8000/update-prices")
     await displayList()
 
-    await showPriceHistory(selectGameId.value)
+    // await showPriceHistory(selectGameId.value)
     console.log("Response:", response.data)
   }catch(e){
     console.log('Error:',e)
@@ -280,6 +280,7 @@ onUnmounted(() =>{
       </div>
 
       <!-- SEARCH RESULTS -->
+      <button @click="updatePrices">Update Prices</button>
       <div 
         ref="resultsBox" 
         v-if="showResults && topResults.length"
