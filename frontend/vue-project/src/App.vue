@@ -257,6 +257,7 @@ onUnmounted(() =>{
   <div class="min-h-screen flex justify-center items-center">
 
     <div class="bg-gray-100 rounded-xl w-full max-w-5xl px-4 pt-28 pb-6 space-y-8">
+
       <!-- HEADER -->
       <header class="bg-white rounded-xl shadow-md p-6 sticky top-0 z-20"> 
 
@@ -271,7 +272,7 @@ onUnmounted(() =>{
           class="border rounded-xl px-4 py-2 flex-1 focus:outline-none focus:ring-2 focus:ring-sky-400"
         />
           <button 
-            class="flex items-center gap-2 px-4 bg-sky-500 text-white rounded-xl hover:bg-sky-600 transition shadow-sm" 
+            class="flex items-center gap-2 px-4 bg-sky-500 text-white rounded-xl hover:bg-sky-600 active:scale-95 transition-all duration-150 shadow-sm" 
             @click="getResults">
             <MagnifyingGlassIcon 
               class="size-5"/>
@@ -284,9 +285,8 @@ onUnmounted(() =>{
       <div 
         ref="resultsBox" 
         v-if="showResults && topResults.length"
-        class="absolute left-0 right-0 mt-2 border rounded-xl p-4 bg-white shadow-lg z-30 max-h-80 overflow-y-auto"
+        class="absolute top-full mt-2 w-full bg-white rounded-xl shadow-sm border border-gray-200 z-30 max-h-80 overflow-y-auto"
       >
-          <h3 class="font-semibold mb-3 text-gray-700">Results</h3>
             <ul class="grid grid-cols-2 gap-3">
               <li 
                 class="p-3 rounded-lg cursor-pointer hover:bg-sky-100 transition transform hover:scale-105 active:scale-95 flex items-center gap-3"  
@@ -309,13 +309,13 @@ onUnmounted(() =>{
       <div class="p-2"></div>
 
       <!-- DASHBOARD -->
-      <main class="grid grid-cols-2 md:grid-cols-[220px_1fr)] gap-6 items-start">
+      <main class="grid grid-cols-2 md:grid-cols-[290px_1fr] gap-6 items-start">
 
         <!-- SIDEBAR / WISHLIST -->
         <aside class="bg-white rounded-xl shadow-md p-4 h-fit">
 
           <div class="flex justify-between items-center mb-4">
-            <h2 class="font-semibold text-gray-800">Wishlist</h2>
+            <h2 class="text-2xl font-semibold tracking-tight">Wishlist</h2>
 
             <button 
               class="text-sm text-sky-600 hover:underline"
@@ -336,17 +336,17 @@ onUnmounted(() =>{
 
         <!-- MAIN CONTENT -->  
           <section 
-          class="bg-white rounded-xl shadow-md p-6 space-y-6 top-55" 
+          class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-6"
           v-if="selectedGameId && priceHistory.length">
 
             <!-- TITLE -->
             <div class="flex justify-between items-center mb-4">
               <h2 class="text-xl font-bold text-gray-800">
-                {{selectedGameTitle}} Price History
+                {{selectedGameTitle}} Price Chart
               </h2>
 
               <span class="text-sm text-gray-500 capitalize">
-                {{selectedPeriod}}
+                ({{selectedPeriod}})
               </span>
             </div>
 
@@ -392,9 +392,9 @@ onUnmounted(() =>{
               </div>
             </div>
 
-            <p class="text-green-600 mt-2">{{reviewSummary.total_positive.toLocaleString()}} Positive Reviews</p>
+            <p class="text-green-600 mt-2 text-sm">{{reviewSummary.total_positive.toLocaleString()}} Positive Reviews</p>
             
-            <p class="text-red-600">{{reviewSummary.total_negative.toLocaleString()}} Negative Reviews</p>
+            <p class="text-red-600 text-sm">{{reviewSummary.total_negative.toLocaleString()}} Negative Reviews</p>
 
           </div>
 
@@ -405,7 +405,7 @@ onUnmounted(() =>{
           <!-- EMPTY STATE -->
           <section 
             v-else
-            class="bg-white rounded-xl shadow-md top-20 p-6 flex flex-col justify-center text-gray-500 text-center min-h-[400px] top-30"
+            class="bg-white rounded-xl shadow-md border border-gray-200 top-20 p-6 flex flex-col justify-center text-gray-500 text-center min-h-[400px] top-30"
           >
           Select a game from your wishlist to view price history 
           </section>
@@ -414,7 +414,7 @@ onUnmounted(() =>{
     <!-- TOAST NOTIFICATIONS -->
     <div 
       v-if="notificationMessage"
-      class="fixed bottom-6 right-6 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-xl"
+      class="fixed bottom-6 right-6 bg-gray-900/90 backdrop-blur text-white px-5 py-3 rounded-xl shadow-lg"
     > 
       {{notificationMessage}}
     </div>
