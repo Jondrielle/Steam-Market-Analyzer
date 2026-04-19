@@ -30,18 +30,20 @@ function emitDeleteGame(game){
         class="flex items-center justify-between py-2 hover:bg-gray-300"
       >
         <!-- Title -->
-        <h2 class="text-lg font-medium">
+        <h2 class="text-md font-small">
           {{ game.title }}
         </h2>
 
         <!-- Icons -->
         <div class="flex items-center gap-3">
           <button 
+            class="bg-gray-200 hover:bg-gray-400 active:scale-80 transition-all duration-150 shadow-lg"
             @click="emitShowPriceHistory(game)">
             <ChartBarSquareIcon class="w-5 h-5" />
           </button>
 
           <button 
+            class="bg-gray-200 hover:bg-gray-400 active:scale-80 transition-all duration-150 rounded"
             @click="emitDeleteGame(game)">
             <TrashIcon class="w-5 h-5" />
           </button>

@@ -101,31 +101,53 @@ async def retrieve_trend(game_id: int, period: Period = Period.daily):
 
 @router.post("/update-prices")
 async def update_prices():
-    games = load_list()
-
-    today = datetime.now().date().isoformat()
+    games = load_list()  # your tracked games list
 
     if not games:
         return {"message": "No games to update"}
 
+    today = datetime.now().date().isoformat()
+
+    def safe_get_price(app_id, retries=3):
+        for attempt in range(retries):
+            try:
+                price = get_current_prices(app_id)
+                if price is not None:
+                    return price
+            except Exception as e:
+                print(f"[{app_id}] attempt {attempt + 1} failed: {e}")
+                time.sleep(2)
+
+        print(f"[{app_id}] FAILED after retries")
+        return None
+
+    success_count = 0
+    failed = []
+
     for game in games:
         app_id = game["app_id"]
 
-        current_price = get_current_prices(app_id)
+        current_price = safe_get_price(app_id)
 
-        #imageUrl = game["image_url"]
-
-        print(game)
+        if current_price is None:
+            failed.append(app_id)
+            continue
 
         game_data = {
             "title": game.get("title", "Unknown"),
             "app_id": app_id,
-            "image_url": "",  # optional improvement later
+            "image_url": "",
             "original_price": current_price,
             "discount": "0%",
             "final_price": current_price
         }
 
         addGamePriceHistory(game_data)
+        success_count += 1
 
-    return {"message": "Prices updated"}
+    return {
+        "message": "update complete",
+        "updated": success_count,
+        "failed": failed,
+        "date": today
+    }
