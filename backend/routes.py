@@ -44,7 +44,7 @@ async def add_game(request: TitleRequest):
 
 
 	if game_exists(game["app_id"]):
-		return {"message":  "Game already exists"}\
+		return game
 
 	save_game_to_list({
 	   	"title": game["title"],
