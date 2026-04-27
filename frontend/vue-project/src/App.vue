@@ -288,7 +288,6 @@ onUnmounted(() =>{
       </div>
 
       <!-- SEARCH RESULTS -->
-      <button @click="updatePrices">Update Prices</button>
       <div 
         ref="resultsBox" 
         v-if="showResults && topResults.length"

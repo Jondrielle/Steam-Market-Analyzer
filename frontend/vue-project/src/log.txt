@@ -1,3 +1,3 @@
 Jan 13,2026
 Next: Fix trend chart issue
-Bugs: When I open trend chart and exit the trend chart reloads even if i close it 
+Bugs: Fix refresh of chart if nothing changed
