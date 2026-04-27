@@ -197,6 +197,7 @@ function handleSetPeriod(period){
 function handleCloseChart(){
   console.log("Closing the chart")
   priceHistory.value = []
+  selectedGameId.value = null
 }
 
 // OUTSIDE CLICK EVENTS 
