@@ -90,11 +90,17 @@ async function getResults() {
 async function addResult(item) {
   try {
     const exists = gameList.value.some(
-      game => game.app_id === item.app_id
+      game => game.app_id === parseInt(item.app_id)
     )
+
+    console.log('Exists:', exists)
+    console.log('Game List:', gameList.value)
 
     if(exists){
       triggerNotification(`${item.title} already in your wishlist`)
+
+      topResults.value = []
+      showResults.value = false
       return
     }
 
