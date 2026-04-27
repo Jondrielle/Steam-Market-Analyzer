@@ -42,11 +42,14 @@ async def add_game(request: TitleRequest):
 
 	game = results[0]
 
-	if not game_exists(request.title):
-	   	save_game_to_list({
-	   		"title": game["title"],
-			"app_id": game["app_id"]
-	   		})
+
+	if game_exists(game["app_id"]):
+		return {"message":  "Game already exists"}\
+
+	save_game_to_list({
+	   	"title": game["title"],
+		"app_id": game["app_id"]
+	})
 
 	addGamePriceHistory(game)
 

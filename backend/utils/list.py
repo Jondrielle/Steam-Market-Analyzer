@@ -26,10 +26,10 @@ def save_game_to_list(game_data):
     else:
         df.to_csv(LIST_FILE, index=False)
 
-def game_exists(game_title):
+def game_exists(game_id):
     df = pd.read_csv(LIST_FILE)
-
-    return (df["title"].astype(str) == str(game_title)).any()
+    print(f"ID is: {game_id}")
+    return (df["app_id"].astype(str) == str(game_id)).any()
 
 def delete_game_from_list(game_id):
     if not os.path.exists(LIST_FILE):
