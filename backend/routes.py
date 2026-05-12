@@ -105,53 +105,66 @@ async def retrieve_trend(game_id: int, period: Period = Period.daily):
 
 @router.post("/update-prices")
 async def update_prices():
-	games = load_list()  # your tracked games list
+    games = load_list()
 
-	if not games:
-		return {"message": "No games to update"}
+    if not games:
+        return {"message": "No games to update"}
 
-	today = datetime.now().date().isoformat()
+    today = datetime.now().date().isoformat()
 
-	def safe_get_price(app_id, retries=3):
-		for attempt in range(retries):
-			try:
-				price = get_current_prices(app_id)
-				if price is not None:
-					return price
-			except Exception as e:
-				print(f"[{app_id}] attempt {attempt + 1} failed: {e}")
-				time.sleep(2)
+    def safe_get_price(app_id, retries=3):
+        for attempt in range(retries):
+            try:
+                price = get_current_prices(app_id)
+                if price is not None:
+                    return price
+            except Exception as e:
+                print(f"[{app_id}] attempt {attempt + 1} failed: {e}")
+                time.sleep(2)
 
-		print(f"[{app_id}] FAILED after retries")
-		return None
+        return None
 
-	success_count = 0
-	failed = []
+    def get_today_entry(app_id):
+        history = getGamePriceHistory(app_id)
+        for entry in reversed(history):
+            if entry.get("date") == today:
+                return entry
+        return None
 
-	for game in games:
-		app_id = game["app_id"]
+    updated = 0
+    failed = []
 
-		current_price = safe_get_price(app_id)
+    for game in games:
+        app_id = game["app_id"]
 
-		if current_price is None:
-			failed.append(app_id)
-			continue
+        current_price = safe_get_price(app_id)
 
-		game_data = {
-			"title": game.get("title", "Unknown"),
-			"app_id": app_id,
-			"image_url": "",
-			"original_price": current_price,
-			"discount": "0%",
-			"final_price": current_price
-		}
+        if current_price is None:
+            failed.append(app_id)
+            continue
 
-		addGamePriceHistory(game_data)
-		success_count += 1
+        today_entry = get_today_entry(app_id)
 
-	return {
-		"message": "update complete",
-		"updated": success_count,
-		"failed": failed,
-		"date": today
-	}
+        game_data = {
+            "app_id": app_id,
+            "title": game.get("title", "Unknown"),
+            "image_url": game.get("image_url", ""),
+            "price": current_price,
+            "date": today
+        }
+
+        if today_entry:
+            # overwrite today's price with latest value
+            updateGamePriceHistory(app_id, today, game_data)
+        else:
+            # first entry of the day
+            addGamePriceHistory(game_data)
+
+        updated += 1
+
+    return {
+        "message": "update complete",
+        "updated": updated,
+        "failed": failed,
+        "date": today
+    }

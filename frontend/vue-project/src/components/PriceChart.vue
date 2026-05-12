@@ -1,4 +1,4 @@
-<script setup>
+this is my price chart file again <script setup>
 import { ref, watch, onMounted } from 'vue'
 import { Chart } from 'chart.js/auto'
 import { XCircleIcon} from '@heroicons/vue/24/outline'
@@ -35,7 +35,10 @@ function renderChart() {
   const prices = props.data.map(p => p.final_price)
 
   if (chart) {
-    chart.destroy()
+    chart.data.labels = labels
+    chart.data.datasets[0].data = prices
+    chart.update()
+    return
   }
 
   chart = new Chart(canvasRef.value, {
@@ -52,7 +55,8 @@ function renderChart() {
     },
     options: {
       responsive: true,
-      maintainAspectRatio: false
+      maintainAspectRatio: false,
+      animation: false
     }
   })
 }
@@ -62,13 +66,15 @@ onMounted(() => {
   renderChart()
 })
 
-watch(
-  () => props.data,
-  () => {
+watch( () => props.data,
+  (newData) => {
+    if (!newData?.length) return
+    if (!canvasRef.value) return
+
     renderChart()
-  },
-  { deep: true }
+  }
 )
+
 </script>
 
 <template>
@@ -108,5 +114,3 @@ watch(
     </div>
   </div>
 </template>
-
-
