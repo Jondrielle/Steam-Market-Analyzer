@@ -124,7 +124,7 @@ def addGamePriceHistory(game_info):
             df["date"] = df["date"].astype(str)
 
             exists = df[
-                (df["app_id"].astype(str) == str(game_info["app_id"])) &
+                (df["app_id"].astype(str) == str(game_info["app_id"])) or
                 (df["date"] == today)
             ]
 
@@ -256,7 +256,7 @@ if __name__ == "__main__":
             continue
 
         # Save selected game
-        addGamePriceHistory(selected)
+        GamePriceHistory(selected)
         addGameToList(selected)
 
         print("Saved to games list and daily price log.\n")

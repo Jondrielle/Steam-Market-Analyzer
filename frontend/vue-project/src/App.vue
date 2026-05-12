@@ -132,7 +132,6 @@ async function deleteGame(item) {
     // 🔑 CLEAR CHART IF DELETED GAME WAS SELECTED
     if (selectedGameId.value === item.app_id) {
       selectedGameId.value = null
-      priceHistory.value = []
     }
 
 
@@ -165,7 +164,12 @@ async function showPriceHistory(gameId){
     });
 
     console.log("FULL RESPONSE:", response.data)
-    priceHistory.value = response.data.prices
+    const newPrices = response.data.prices
+
+    if (JSON.stringify(newPrices) !== JSON.stringify(priceHistory.value)) {
+      priceHistory.value = newPrices
+    }
+    
     console.log("APP priceHistory:", priceHistory.value)
     loading.value = false 
   } catch (err) {
@@ -227,10 +231,11 @@ async function getGameReviewInfo(appId){
 async function updatePrices(){
   try{
     const response = await axios.post("http://localhost:8000/update-prices")
-    await displayList()
 
-    // await showPriceHistory(selectGameId.value)
-    console.log("Response:", response.data)
+     // 🔥 IMPORTANT: refresh currently selected chart
+    if (selectedGameId.value) {
+      await showPriceHistory(selectedGameId.value)
+    }
   }catch(e){
     console.log('Error:',e)
   }
@@ -240,11 +245,11 @@ async function updatePrices(){
 onMounted( async ()=> {
   await displayList()
 
-  interval = setInterval(async ()=> {
-    if(selectedGameId.value){
-      await showPriceHistory(selectedGameId.value)
-    }
-  }, 10000)
+  interval = setInterval(async () => {
+  if (!selectedGameId.value) return
+
+  await showPriceHistory(selectedGameId.value)
+}, 300000)
   
   document.addEventListener('click',handleClickOutside)
 })
@@ -343,7 +348,7 @@ onUnmounted(() =>{
         <!-- MAIN CONTENT -->  
           <section 
           class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-6"
-          v-if="selectedGameId && priceHistory.length">
+          v-if="selectedGameId">
 
             <!-- TITLE -->
             <div class="flex justify-between items-center mb-4">
@@ -371,16 +376,24 @@ onUnmounted(() =>{
               </div>
             </div>
 
+           
             <PriceChart
-              v-else-if="selectedGameId && priceHistory.length && !loading"
+              v-if="selectedGameId"
               :data="priceHistory"
               :period="selectedPeriod"
               @closeChart="handleCloseChart"
               @selectPeriod="handleSetPeriod"
-              class="text-gray-500"
             />
 
-            <div v-else-if="selectedGameId"> No price history available </div>
+            <!-- NO DATA -->
+            <div v-else-if="selectedGameId">
+              No price history available
+            </div>
+
+            <!-- DEFAULT -->
+            <div v-else>
+              Select a game from your wishlist to view price history
+            </div>
             
             <div class="border-b border-gray-200"></div>
 
