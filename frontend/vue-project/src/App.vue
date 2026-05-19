@@ -4,7 +4,6 @@ import axios from 'axios'
 import GameList from './components/GameList.vue'
 import PriceChart from './components/PriceChart.vue'
 import SearchFunction from './components/SearchFunction.vue'
-import { ChartBarSquareIcon, MagnifyingGlassIcon,TrashIcon} from '@heroicons/vue/24/outline'
 import notificationAudio from './assets/Notification.wav'
 
 
@@ -244,12 +243,6 @@ async function updatePrices(){
 
 onMounted( async ()=> {
   await displayList()
-
-  interval = setInterval(async () => {
-  if (!selectedGameId.value) return
-
-  await showPriceHistory(selectedGameId.value)
-}, 300000)
   
   document.addEventListener('click',handleClickOutside)
 })
@@ -266,14 +259,14 @@ onUnmounted(() =>{
 </script>
 
 <template>
-  <div class="min-h-screen flex justify-center items-center">
+  <div class="min-h-screen bg-stone px-4 py-8 max-w-6xl mx-auto">
 
-    <div class="bg-gray-100 rounded-xl w-full max-w-5xl px-4 pt-28 pb-6 space-y-8">
+    <div class="bg-stone rounded-xl w-full max-w-5xl px-4 pb-6 space-y-8">
 
       <!-- HEADER -->
-      <header class="bg-white rounded-xl shadow-md p-6 sticky top-0 z-20"> 
+      <header class="relative bg-white rounded-2xl border border-[var(--color-mist)] p-5 shadow-sm">
 
-      <h1 class="text-2xl font-bold text-gray-800">Steam Price Tracker</h1>
+      <h1 class="text-3xl font-semibold tracking-tight">Steam Price Tracker</h1>
 
       <!-- SEARCH BAR -->
       <div class="flex gap-2">
@@ -281,10 +274,10 @@ onUnmounted(() =>{
           v-model="searchName" 
           placeholder="Enter game name"
           @keyup.enter="getResults"
-          class="border rounded-xl px-4 py-2 flex-1 focus:outline-none focus:ring-2 focus:ring-sky-400"
+          class="border rounded-2xl px-4 py-2 flex-1"
         />
           <button 
-            class="flex items-center gap-2 px-4 bg-sky-500 text-white rounded-xl hover:bg-sky-600 active:scale-95 transition-all duration-150 shadow-sm" 
+            class="flex items-center gap-2 px-4 bg-gold-400 text-sage-100 rounded-xl hover:bg-gold-600 active:scale-95 transition-all duration-150 shadow-sm" 
             @click="getResults">
             <MagnifyingGlassIcon 
               class="size-5"/>
@@ -296,21 +289,24 @@ onUnmounted(() =>{
       <div 
         ref="resultsBox" 
         v-if="showResults && topResults.length"
-        class="absolute top-full mt-2 w-full bg-white rounded-xl shadow-sm border border-gray-200 z-30 max-h-80 overflow-y-auto"
+        class="absolute top-full mt-2 w-full bg-white rounded-2xl shadow-sm border border-gray-200 z-30 max-h-80 overflow-y-auto"
       >
-            <ul class="grid grid-cols-2 gap-3">
+            <ul class="flex flex-col gap-3">
               <li 
-                class="p-3 rounded-lg cursor-pointer hover:bg-sky-100 transition transform hover:scale-105 active:scale-95 flex items-center gap-3"  
+                class="p-3 rounded-xl cursor-pointer hover:bg-gray-50 transition flex items-center gap-3"
                 v-for="item in topResults" 
                 :key="item.app_id"
                 @click="addResult(item)"
               >
               <img 
                 :src="item.image_url" 
-                class="w-16 rounded"/>
+                class="w-16 rounded-xl"/>
 
-                <span class="text-sm font-medium text-gray-800"
-                @click.stop="getGameReviewInfo(item.app_id)">{{ item.title}}
+                <span
+                  class="text-sm font-medium text-sage-700"
+                  @click="getGameReviewInfo(item.app_id)"
+                >
+                  {{ item.title }}
                 </span>
               </li>
             </ul>
@@ -323,13 +319,13 @@ onUnmounted(() =>{
       <main class="grid grid-cols-2 md:grid-cols-[290px_1fr] gap-6 items-start">
 
         <!-- SIDEBAR / WISHLIST -->
-        <aside class="bg-white rounded-xl shadow-md p-4 h-fit">
+        <aside class="bg-white rounded-xl shadow-sm p-4 h-fit border border-gold-200">
 
-          <div class="flex justify-between items-center mb-4">
-            <h2 class="text-2xl font-semibold tracking-tight">Wishlist</h2>
+          <div class="flex justify-between items-center mb-4 pb-2 border-b border-gray-100">
+            <h2 class="text-xl font-semibold text-sage-900">Wishlist</h2>
 
             <button 
-              class="text-sm text-sky-600 hover:underline"
+              class="text-sm text-sage-700 hover:underline"
               @click="toggleShow"
             >
               {{ showList ? "Hide" : "Show"}}
@@ -347,16 +343,16 @@ onUnmounted(() =>{
 
         <!-- MAIN CONTENT -->  
           <section 
-          class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-6"
+          class="bg-white rounded-2xl shadow-sm border border-gold-200 p-6 space-y-10"
           v-if="selectedGameId">
 
             <!-- TITLE -->
             <div class="flex justify-between items-center mb-4">
-              <h2 class="text-xl font-bold text-gray-800">
+              <h2 class="text-xl font-bold text-sage-700">
                 {{selectedGameTitle}} Price Chart
               </h2>
 
-              <span class="text-sm text-gray-500 capitalize">
+              <span class="text-sm text-sage-700 capitalize">
                 ({{selectedPeriod}})
               </span>
             </div>
@@ -366,13 +362,13 @@ onUnmounted(() =>{
             <!-- CHART -->
             <div v-if="loading" class="space-y-4 animate-pulse">
 
-              <div class="h-6 bg-gray-300 rounded w-1/3"></div>
+              <div class="h-6 bg-gray-300 rounded-xl w-1/3"></div>
 
               <div class="h-64 bg-gray-300 rounded-xl"></div>
 
               <div class="space-y-2">
-                <div class="h-4 bg-gray-300 rounded w-1/2"></div>
-                <div class="h-4 bg-gray-300 rounded w-1/3"></div>
+                <div class="h-4 bg-gray-300 rounded-xl w-1/2"></div>
+                <div class="h-4 bg-gray-300 rounded-xl w-1/3"></div>
               </div>
             </div>
 
@@ -399,13 +395,13 @@ onUnmounted(() =>{
 
           <!-- REVIEWS -->
           <div v-if="reviewSummary.total_reviews > 0">
-            <h5 class="text-lg font-bold mb-2 text-gray-800">{{reviewSummary.review_score_desc}}</h5>
+            <h5 class="text-lg font-bold mb-2 text-sage-700">{{reviewSummary.review_score_desc}}</h5>
 
             <p class="font-semibold text-base mb-2"> {{((reviewSummary.total_positive/reviewSummary.total_reviews)*100).toFixed(0)}}% Positive</p>
 
-            <div class="h-2 rounded-full bg-gray-200 w-full">
+            <div class="h-2 rounded-xl bg-gray-200 w-full">
               <div 
-              class="h-2 rounded-full bg-green-500"
+              class="h-2 rounded-xl bg-green-500"
               :style="{ width:((reviewSummary.total_positive /reviewSummary.total_reviews) * 100) + '%' }"
               >
               </div>
@@ -417,23 +413,25 @@ onUnmounted(() =>{
 
           </div>
 
-          <div v-else-if="reviewSummary.total_reviews == 0" class="text-gray-500"> No Available Reviews</div>
+          <div v-else-if="reviewSummary.total_reviews == 0" class="text-sage-700"> No Available Reviews</div>
 
         </section>
 
           <!-- EMPTY STATE -->
-          <section 
-            v-else
-            class="bg-white rounded-xl shadow-md border border-gray-200 top-20 p-6 flex flex-col justify-center text-gray-500 text-center min-h-[400px] top-30"
-          >
-          Select a game from your wishlist to view price history 
-          </section>
+          <div v-else-if="selectedGameId == null" class="flex flex-col items-center justify-center text-center text-gray-500 min-h-[400px]">
+            <div class="text-lg font-medium text-gray-700 mb-2">
+              No game selected
+            </div>
+            <div class="text-sm text-gray-500">
+              Choose a game from your wishlist to view pricing trends and reviews
+            </div>
+          </div>
     </main>
           
     <!-- TOAST NOTIFICATIONS -->
     <div 
       v-if="notificationMessage"
-      class="fixed bottom-6 right-6 bg-gray-900/90 backdrop-blur text-white px-5 py-3 rounded-xl shadow-lg"
+      class="fixed bottom-6 right-6 bg-sage-900 backdrop-blur text-white px-5 py-3 rounded-xl shadow-sm"
     > 
       {{notificationMessage}}
     </div>
@@ -447,7 +445,7 @@ onUnmounted(() =>{
 
 
 
-                  
+                
 
 
 

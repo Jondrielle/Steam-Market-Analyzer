@@ -1,1 +1,23 @@
 @import "tailwindcss";
+
+@theme {
+  /* Primary Sage */
+  --color-sage-50: #F4F7F4;
+  --color-sage-100: #E7EEE8;
+  --color-sage-200: #D3E1D5;
+  --color-sage-400: #7E9B84;
+  --color-sage-700: #3F5144;
+  --color-sage-900: #1F2A22;
+
+  /* Professional Yellow / Gold */
+  --color-gold-50: #FFF9EB;
+  --color-gold-100: #FFF1C7;
+  --color-gold-200: #FFE08A;
+  --color-gold-400: #D4A72C;
+  --color-gold-600: #9A7412;
+
+  /* Neutrals */
+  --color-charcoal: #1C1F1D;
+  --color-stone: #F5F5F2;
+  --color-mist: #E8EAE6;
+}
