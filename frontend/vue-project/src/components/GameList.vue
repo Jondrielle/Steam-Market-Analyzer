@@ -22,7 +22,7 @@ function emitDeleteGame(game){
 <template>
   <div 
   v-if="props.gameList.length" 
-  class="border-3 border-red-300">
+  class="">
     <ul>
       <li
         v-for="game in props.gameList"
@@ -35,15 +35,15 @@ function emitDeleteGame(game){
         </h2>
 
         <!-- Icons -->
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-3 ">
           <button 
-            class="bg-gray-200 hover:bg-gray-400 active:scale-80 transition-all duration-150 shadow-lg"
+            class="bg-sage-200 hover:bg-gray-400 active:scale-80 transition-all duration-150 shadow-lg"
             @click="emitShowPriceHistory(game)">
             <ChartBarSquareIcon class="w-5 h-5" />
           </button>
 
           <button 
-            class="bg-gray-200 hover:bg-gray-400 active:scale-80 transition-all duration-150 rounded"
+            class="bg-sage-200 hover:bg-gray-400 active:scale-80 transition-all duration-150 rounded"
             @click="emitDeleteGame(game)">
             <TrashIcon class="w-5 h-5" />
           </button>
