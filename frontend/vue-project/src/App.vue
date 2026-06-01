@@ -74,7 +74,7 @@ async function getResults() {
       return
     }
 
-    const response = await axios.get('${API_URL}/find', {
+    const response = await axios.get(`${API_URL}/find`, {
       params: { title: searchName.value }
     })
 
@@ -104,7 +104,7 @@ async function addResult(item) {
       return
     }
 
-    await axios.post('${API_URL}/add', item)
+    await axios.post(`${API_URL}/add`, item)
     gameList.value.push(item)
     topResults.value = []
     showResults.value = false
@@ -146,7 +146,7 @@ async function deleteGame(item) {
 // GAME LIST 
 async function displayList() {
   try{
-    const response = await axios.get('${API_URL}/list')
+    const response = await axios.get(`${API_URL}/list`)
     gameList.value = response.data || []
   }catch(err){
     console.error("Failed to load wishlist", err)
