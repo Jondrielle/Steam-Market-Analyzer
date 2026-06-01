@@ -10,6 +10,7 @@ import notificationAudio from './assets/Notification.wav'
 let interval
 let notificationTimer = null
 
+const API_URL = import.meta.env.VITE_API_URL
 const priceHistory = ref([])
 const searchName = ref('')
 const topResults = ref([])
@@ -37,7 +38,7 @@ const selectedGameTitle = computed(()=>{
 async function getReviews(appId){
   console.log("Game id is:", appId)
   try{
-    const response = await axios.get(`http://localhost:8000/reviews/${appId}`)
+    const response = await axios.get(`${API_URL}/reviews/${appId}`)
 
     reviewSummary.value = response.data.query_summary
     console.log("Review:", reviewSummary.value)
@@ -73,7 +74,7 @@ async function getResults() {
       return
     }
 
-    const response = await axios.get('http://localhost:8000/find', {
+    const response = await axios.get('${API_URL}/find', {
       params: { title: searchName.value }
     })
 
@@ -103,7 +104,7 @@ async function addResult(item) {
       return
     }
 
-    await axios.post('http://localhost:8000/add', item)
+    await axios.post('${API_URL}/add', item)
     gameList.value.push(item)
     topResults.value = []
     showResults.value = false
@@ -120,7 +121,7 @@ async function addResult(item) {
 // DELETE GAME 
 async function deleteGame(item) {
   try {
-    await axios.delete(`http://localhost:8000/delete/${item.app_id}`)
+    await axios.delete(`${API_URL}/delete/${item.app_id}`)
 
 
     console.log("Item deleted:",item)
@@ -145,7 +146,7 @@ async function deleteGame(item) {
 // GAME LIST 
 async function displayList() {
   try{
-    const response = await axios.get('http://localhost:8000/list')
+    const response = await axios.get('${API_URL}/list')
     gameList.value = response.data || []
   }catch(err){
     console.error("Failed to load wishlist", err)
@@ -158,7 +159,7 @@ async function showPriceHistory(gameId){
   selectedGameId.value = gameId
   try {
     loading.value = true
-    const response = await axios.get(`http://localhost:8000/games/${gameId}/price-history`, {
+    const response = await axios.get(`${API_URL}/games/${gameId}/price-history`, {
       params: { period: selectedPeriod.value }
     });
 
@@ -229,7 +230,7 @@ async function getGameReviewInfo(appId){
 
 async function updatePrices(){
   try{
-    const response = await axios.post("http://localhost:8000/update-prices")
+    const response = await axios.post("${API_URL}/update-prices")
 
      // 🔥 IMPORTANT: refresh currently selected chart
     if (selectedGameId.value) {
